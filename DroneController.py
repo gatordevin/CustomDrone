@@ -9,13 +9,20 @@ class droneCont:
         self.sbus = DroneComms.SBUSUDP(ip)
         self.armed = False
         self.data = [1500] * 16
+        self.throttleDead = 1100
+    def updateDead(self, change):
+        self.throttleDead += change
     def move(self, y, r ,p, t):
         self.data[self.yaw] = 1500 + (y*500)
         self.data[self.roll] = 1500 + (r*500)
         self.data[self.pitch] = 1500 + (p*500)
-        self.data[self.throttle] = 1400 + (t*500)
+        if(self.throttleDead + (t*500) > 10):
+            self.data[self.throttle] = self.throttleDead + (t * 500)
+        else:
+            self.data[self.throttle] = 1000
+        print(self.data[self.throttle])
         if(self.armed == True):
-            self.data[self.arm] = 1800
+            self.data[self.arm] = 2000
         else:
             self.data[self.arm] = 1200
         self.sbus.sendUDP(self.data)
@@ -27,7 +34,8 @@ class droneCont:
         self.sbus.sendUDP(data)
     def arming(self):
         data = [1500] * 16
-        data[self.arm] = 1800
+        data[self.arm] = 2000
+        data[self.throttle] = 800.0
         self.armed = True
         self.sbus.sendUDP(data)
     def disarm(self):
