@@ -1,15 +1,42 @@
 import socket
 import time
 class SBUSUDP:
-    def __init__(self, ip):
+    def __init__(self, ip=None):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.newChannels = [1024] * 16
         self.oldChannels = []
-        self.ip = ip
+        self.ip = ""
+        if(ip == None):
+            hostname = socket.gethostname()
+            IPAddr = socket.gethostbyname(hostname)
+            splitted = IPAddr.split(".")
+            ipSearch = ""
+            for i in range(len(splitted) - 1):
+                ipSearch += splitted[i] + "."
+            for i in range(0, 101):
+                ips = ipSearch + str(i)
+                data = bytearray(4)
+                data[0] = ord('H')
+                data[1] = ord('A')
+                data[2] = ord('N')
+                data[3] = ord('D')
+                self.client_socket.sendto(data, (ips, 6666))
+                try:
+                    self.client_socket.settimeout(0.01)
+                    data = self.client_socket.recvfrom(256)
+                    if (data != None):
+                        self.ip = ips
+                        break
+                except:
+                    None
+        else:
+            self.ip = ip
+        print(self.ip)
         self.timeSent = time.time()
 
     def bit_not(self, n, numbits=8):
         return (1 << numbits) - 1 - n
+
 
     def create_SBUS(self, chan):
         data = bytearray(31)
@@ -72,8 +99,10 @@ class SBUSUDP:
         data[3] = ord('T')
         return (data)
 
+    def findDevice(self):
+
+        self.client_socket.sendto(self.create_BEAT(), (self.ip, 6666))
     def sendUDP(self, channels):
-        #print("sendUDP:" + str(channels[4]))
         for i in range(len(channels)):
             self.update_channel(i, channels[i])
         #print(list(self.newChannels))
@@ -82,6 +111,7 @@ class SBUSUDP:
             channels = bytearray(self.create_SBUS(self.newChannels))
             self.client_socket.sendto(channels, (self.ip, 6666))
             self.timeSent = time.time()
+            #print(self.ip)
             #self.oldChannels = self.newChannels
             #print(list(self.newChannels))
         elif (time.time() - self.timeSent >= 0.5):

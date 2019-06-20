@@ -1,10 +1,12 @@
 from DroneController import droneCont
 import pygame
 import time
-drone = droneCont("192.168.1.185")
+drone = droneCont("10.0.0.8")
 pygame.init()
 pygame.joystick.init()
 joystick_count = pygame.joystick.get_count()
+leftBump = False
+rightBump = False
 if joystick_count != 0:
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
@@ -47,5 +49,11 @@ while True:
         drone.arming()
     elif(b_button):
         drone.disarm()
+
+    if(joystick.get_button(4)):
+        drone.updateDead(-2.0)
+
+    if(joystick.get_button(5)):
+        drone.updateDead(2.0)
     drone.move(0.1*x1_axis,0.25*x2_axis,-0.25*y2_axis,-y1_axis)
     time.sleep(0.05)
