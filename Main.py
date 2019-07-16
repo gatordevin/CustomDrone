@@ -1,7 +1,7 @@
 from DroneController import droneCont
 import pygame
 import time
-drone = droneCont("10.0.0.8")
+drone = droneCont("10.0.0.32")
 pygame.init()
 pygame.joystick.init()
 joystick_count = pygame.joystick.get_count()
@@ -13,6 +13,14 @@ if joystick_count != 0:
 else:
     pygame.quit()
 drone.arming()
+drone.enableAlignment()
+
+# number of inputs
+# name = joystick.get_name()
+# axes = joystick.get_numaxes()
+# buttons = joystick.get_numbuttons()
+# hats = joystick.get_numhats()
+
 while True:
     # get every event in the events list
     events = pygame.event.get()
@@ -21,12 +29,6 @@ while True:
             pygame.send('client terminate')
             pygame.quit()
             quit()
-
-    # number of inputs
-    name = joystick.get_name()
-    axes = joystick.get_numaxes()
-    buttons = joystick.get_numbuttons()
-    hats = joystick.get_numhats()
 
     # get the input types value
     x1_axis = joystick.get_axis(0)
@@ -55,5 +57,6 @@ while True:
 
     if(joystick.get_button(5)):
         drone.updateDead(2.0)
+
     drone.move(0.1*x1_axis,0.25*x2_axis,-0.25*y2_axis,-y1_axis)
     time.sleep(0.05)
